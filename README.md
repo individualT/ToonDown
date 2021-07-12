@@ -5,6 +5,8 @@
 제목이나 웹툰의 id를 입력하였을 때 내장함수들을 활용하여 많은 것을 할 수 있다.  
 
 사용 예:  
+
+
     from core import toon, page, homepagemaker
     option='newtoki'
     info=14530561
