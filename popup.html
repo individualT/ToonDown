@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title>오픈페이지</title>
+    <meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script language="javascript">
+        
+	function check(){
+		//체크박스에 체크를 했다면 test_cookie라는 이름의 쿠키를 생성한 후에 페이지를 닫는다
+		if(document.form1.checkbox1.checked){
+			SetCookie('test_cookie','1');
+			self.close();
+		}
+		//체크없이 닫기만 눌렀다면 아무런 변화없이 페이지만 닫느다
+		else{
+			self.close();
+		}
+	}
+	//위에서 설정한 이름과 값으로 쿠키 생성
+	function SetCookie(sName, sValue){
+		document.cookie = sName + "=" + escape(sValue);
+	}
+	//-->
+	</script>
+</head>
+<body bgcolor='black'>
+    <p style="color:white;">
+    -  화면의 오른쪽부분 터치하거나, 우 화살표 클릭 시 다음 화로 넘어감
+    <br><br>-  왼쪽 부분 터치하거나, 좌 화살표 클릭 시 이전화로 돌아감
+<br><br>-  스페이스 바를 누르거나, 화면의 밑부분을 터치하면 소리 재생 / 중지</p>
+<br>
+<form name="form1" method="post">	
+<input type="checkbox" name="checkbox1" style="position:absolute; left:10px" value="checked">
+	<p style="color:white;">&nbsp; &nbsp; &nbsp;이 창을 다시 보지 않기.</p>
+	
+	
+	<a href="#" onClick="javascript:check();" style="text-align:center;">            닫기</a>
+</body>
+</html>

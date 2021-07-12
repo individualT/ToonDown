@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>%s</title>
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:400,600|Permanent+Marker'><link rel="stylesheet" href="../styletest.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<style>
+.myButton {
+        box-shadow: 0px 1px 0px 0px #1c1b18;
+        background:linear-gradient(to bottom, #eae0c2 5%%, #ccc2a6 100%%);
+        background-color:#eae0c2;
+        border-radius:15px;
+        border:2px solid #333029;
+        display:inline-block;
+        cursor:pointer;
+        color:#505739;
+        font-family:Courier New;
+        font-size:14px;
+        font-weight:bold;
+        padding:12px 16px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #ffffff;
+}
+.myButton:hover {
+        background:linear-gradient(to bottom, #ccc2a6 5%%, #eae0c2 100%%);
+        background-color:#ccc2a6;
+}
+.myButton:active {
+        position:relative;
+        top:1px;
+}</style>
+</head>
+<body>
+<button class="myButton" onclick='location.href=".."'>GO BACK</button>
+<main id="sites">
+%s
+</main>
+<script>
+  $("label").html("<svg id=\"heart-svg\" viewBox=\"467 392 58 57\" xmlns=\"http://www.w3.org/2000/svg\"> <g id=\"Group\" fill=\"none\" fill-rule=\"evenodd\" transform=\"translate(467 392)\"> <path d=\"M29.144 20.773c-.063-.13-4.227-8.67-11.44-2.59C7.63 28.795 28.94 43.256 29.143 43.394c.204-.138 21.513-14.6 11.44-25.213-7.214-6.08-11.377 2.46-11.44 2.59z\" id=\"heart\" fill=\"#AAB8C2\"/> <circle id=\"main-circ\" fill=\"#E2264D\" opacity=\"0\" cx=\"29.5\" cy=\"29.5\" r=\"1.5\"/> <g id=\"grp7\" opacity=\"0\" transform=\"translate(7 6)\"> <circle id=\"oval1\" fill=\"#9CD8C3\" cx=\"2\" cy=\"6\" r=\"2\"/> <circle id=\"oval2\" fill=\"#8CE8C3\" cx=\"5\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp6\" opacity=\"0\" transform=\"translate(0 28)\"> <circle id=\"oval1\" fill=\"#CC8EF5\" cx=\"2\" cy=\"7\" r=\"2\"/> <circle id=\"oval2\" fill=\"#91D2FA\" cx=\"3\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp3\" opacity=\"0\" transform=\"translate(52 28)\"> <circle id=\"oval2\" fill=\"#9CD8C3\" cx=\"2\" cy=\"7\" r=\"2\"/> <circle id=\"oval1\" fill=\"#8CE8C3\" cx=\"4\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp2\" opacity=\"0\" transform=\"translate(44 6)\"> <circle id=\"oval2\" fill=\"#CC8EF5\" cx=\"5\" cy=\"6\" r=\"2\"/> <circle id=\"oval1\" fill=\"#CC8EF5\" cx=\"2\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp5\" opacity=\"0\" transform=\"translate(14 50)\"> <circle id=\"oval1\" fill=\"#91D2FA\" cx=\"6\" cy=\"5\" r=\"2\"/> <circle id=\"oval2\" fill=\"#91D2FA\" cx=\"2\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp4\" opacity=\"0\" transform=\"translate(35 50)\"> <circle id=\"oval1\" fill=\"#F48EA7\" cx=\"6\" cy=\"5\" r=\"2\"/> <circle id=\"oval2\" fill=\"#F48EA7\" cx=\"2\" cy=\"2\" r=\"2\"/> </g> <g id=\"grp1\" opacity=\"0\" transform=\"translate(24)\"> <circle id=\"oval1\" fill=\"#9FC7FA\" cx=\"2.5\" cy=\"3\" r=\"2\"/> <circle id=\"oval2\" fill=\"#9FC7FA\" cx=\"7.5\" cy=\"2\" r=\"2\"/> </g> </g> </svg>");
+var toon_title='%s';
+function GetCookie(sName){
+  var aCookie = document.cookie.split("; ");
+  for(var i=0; i<aCookie.length; i++){
+      var aCrumb = aCookie[i].split("=");
+      if(sName == aCrumb[0]){
+          return unescape(aCrumb[1]);
+      }
+  }
+  return null;
+}
+function changecookie(but){
+  if ($("#"+but.id).is(':checked')){
+    document.cookie=toon_title+but.id+"=1;expires=Thu, 19 Dec 2022 12:00:00 UTC; path=/";
+  }   else {
+    document.cookie=toon_title+but.id+"=0;expires=Thu, 19 Dec 2022 12:00:00 UTC; path=/";
+  }
+}
+var strReturn;
+var length=%d;
+for (var i = 1; i <= length; i++) {
+  strReturn = GetCookie(toon_title+i);
+  if(strReturn == '1'){
+    $("#"+i).prop("checked", true);
+}
+}
+strReturn = GetCookie(toon_title);
+if (strReturn != null){
+var ind=parseInt(strReturn);
+$("h2").eq(ind-1).append(" <==  마지막으로 본 화");
+}
+</script>
+</body>
+</html>

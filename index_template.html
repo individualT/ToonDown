@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>TOON</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.12/css/all.css'><link rel="stylesheet" href="./style.css">
+<style>
+body{margin:0; padding:0;}
+</style>
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<nav>
+  <div class="container">
+    <div class="grid">
+      <div class="column-xs-12 column-md-10">
+        <p id="highlight">TOON</p>
+      </div>
+      <div class="column-xs-12 column-md-2">
+        <ul>
+          <li><a href="/" class="active">HOMEPAGE</a></li>
+          <li><a href="./popup.html">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+<section class="gallery">
+  <div class="container">
+    <div class="grid">
+%s      
+    </div>
+  </div>
+</section>
+
+<!-- partial -->
+  <script  src="./script.js"></script>
+<script>
+function GetCookie(sName){
+    var aCookie = document.cookie.split("; ");
+    for(var i=0; i<aCookie.length; i++){
+        var aCrumb = aCookie[i].split("=");
+        if(sName == aCrumb[0]){
+            return unescape(aCrumb[1]);
+        }
+    }
+    return null;
+}
+var toons=[%s];
+var strReturn;
+var a;
+var b;
+var c;
+for (var i = 0; i < toons.length; i++) {
+    strReturn = GetCookie(toons[i]);
+    if(strReturn != null){
+    a=document.getElementById(toons[i]+'a');
+    
+    b=document.getElementById(toons[i]+'b');
+    c=document.getElementById(toons[i]);
+    a.innerHTML=a.innerHTML+" "+strReturn+"화까지 봄";
+    b.innerHTML=b.innerHTML+" "+strReturn+"화까지 봄";
+    //c.setAttribute('onclick','location.href ="./'+toons[i]+'/'+strReturn+'.html"')
+}
+}
+
+</script>
+</body>
+</html>
