@@ -1,0 +1,1 @@
+#by using csv, we may list down informations of toons (last updated, total nums, rate, finished...)

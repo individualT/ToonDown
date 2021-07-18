@@ -5,7 +5,7 @@ def isint(x):
         return True
     except ValueError:
         return False
-with open('waitlist.txt','rb') as fp:
+with open('waitlist.txt', 'rb') as fp:
     li=pickle.load(fp)
 print(li)
 while True:
@@ -21,6 +21,6 @@ while True:
     else:
         li.append(inp)
     print(li)
-with open('waitlist.txt','wb') as fp:
+with open('waitlist.txt', 'wb') as fp:
     pickle.dump(li,fp)
 print("quit",li)
