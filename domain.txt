@@ -1,0 +1,1 @@
+{'tkor_domain': 'https://tkor.help', 'newtoki_domain': 'https://newtoki95.com'}
