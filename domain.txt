@@ -1,1 +1,2 @@
-{'tkor_domain': 'https://tkor.help', 'newtoki_domain': 'https://newtoki95.com'}
+tkor_domain https://tkor.click
+newtoki_domain https://newtoki101.com

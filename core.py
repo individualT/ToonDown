@@ -3,20 +3,28 @@ import requests
 import base64
 from bs4 import BeautifulSoup as bs
 import os
-import ast
 from tqdm import tqdm
 from datetime import datetime as dt
+import re
 
 overwrite = False
 loggin = False
-domain = open('domain.txt', 'r')
-domains = ast.literal_eval(domain.read())
-newtoki_domain = domains['newtoki_domain']
+domains = {i[0]:i[1] for i in [j.replace('\n','').split(' ') for j in open('domain.txt', 'r').readlines()]}
+newtoki_domain = domains['newtoki_domain'] #requests.get('https://newtoki13.org').url[:-1] 
 tkor_domain = domains['tkor_domain']
-
-
-def search(query):
-    soup = bs(requests.get(newtoki_domain + '/webtoon?stx=' + query.replace(' ', '+')).text, 'html.parser')
+def req(url):
+    tr=0
+    maxtr=10
+    while tr<maxtr:
+        try:
+            resp=requests.get(url)
+            return resp
+        except:
+            tr+=1
+    print('max try exceeded',maxtr,url)
+    assert False
+def searchnewtoki(query):
+    soup = bs(req(newtoki_domain + '/webtoon?stx=' + query.replace(' ', '+')).text, 'html.parser')
     lis = soup.find('ul', {'id': 'webtoon-list-all'}).findAll('li')
     results = {}
     for li in lis:
@@ -24,25 +32,56 @@ def search(query):
     if query in results.keys():
         return query, results[query]
     if results == {}:
-        print('다른 검색어로 검색해보세요. 검색결과가 없습니다')
-        a = search(input('검색어 : '))
+        print(f'{query}에 대한 검색결과가 없습니다. 다른 검색어로 검색해보세요.')
+        a = searchnewtoki(input('검색어 : '))
         return a
+    print(results)
     print('추천 : ', list(results.keys()))
-    print('위중 하나를 골라서 다시 입력하시거나, 다른 검색어를 입력해보세요.')
-    a = search(input('검색어 : '))
-    return a
-
-
+    inp=input((f'{query}에 대한 검색결과가 없습니다. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
+    if inp.isnumeric():
+        return list(results.keys())[int(inp)-1],results[list(results.keys())[int(inp)-1]]
+    elif inp in results.keys():
+        return inp,results[inp]
+    else:
+        return searchnewtoki(inp)
+def searchtkor(query):
+    soup = bs(req(tkor_domain + '/bbs/search.php?stx=' + query.replace(' ', '+')).text, 'html.parser')
+    results={i.find('h3').text:i['href'][1:] for i in soup.findAll('a',{'id':'title'})}
+    if query in results.keys():
+        return query, results[query]
+    if results == {}:
+        print(f'{query}에 대한 검색결과가 없습니다. 다른 검색어로 검색해보세요.')
+        a = searchtkor(input('검색어 : '))
+        return a
+    print(results)
+    print('추천 : ', list(results.keys()))
+    inp=input((f'{query}에 대한 검색결과가 없습니다. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
+    if inp.isnumeric():
+        return list(results.keys())[int(inp)-1],results[list(results.keys())[int(inp)-1]]
+    elif inp in results.keys():
+        return inp,results[inp]
+    else:
+        return searchtkor(inp)
+def search(query,opt):
+    
+    if opt=='newtoki':
+        return searchnewtoki(query)
+    elif opt=='tkor':
+        return searchtkor(query)
+    else:
+        print('opt error')
+    assert False
 def log(message):
     with open('log.txt', 'a') as logfile:
         logfile.write(str(dt.now()) + "\t" + message + '\n')
 
-
-# hdr = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3', 'Accept-Encoding': 'none', 'Accept-Language': 'en-US,en;q=0.8', 'Connection': 'keep-alive'}
+def filenamer(filename):
+    return re.sub('[\*?|]','',filename).replace(' ', '_').replace('/','-').replace(':','-').replace('"',"'").replace('<','[').replace('>',']')
+hdr = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3', 'Accept-Encoding': 'none', 'Accept-Language': 'en-US,en;q=0.8', 'Connection': 'keep-alive'}
 def download(url, file_name):
     if not os.path.isfile(file_name):
         with open(file_name, "wb") as file:
-            response = requests.get(url)
+            response = req(url)
             file.write(response.content)
 
 
@@ -76,6 +115,8 @@ def direc():
         toons.remove('info')
     if '__pycache__' in toons:
         toons.remove('__pycache__')
+    if '.idea' in toons:
+        toons.remove('.idea')
     return toons
 
 
@@ -90,7 +131,7 @@ def homepagemaker():
             print(i)
             raise
         ind += '"%s",' % i
-        toonname = i.replace("_", " ")
+        toonname = i.replace("-", " ")
         menus += """
                 <div class="column-xs-12 column-md-4" id="%s" onclick='location.href ="./%s"'>
     <figure class="img-container">
@@ -122,29 +163,41 @@ def foldermaker(folder):
             print('could not make folder %s- maybe due to permission; use chmod' % folder)
             if logging: log('could not make folder %s- maybe due to permission; use chmod' % folder)
             raise
-
-
+def srcftn():
+    return [[' '.join(i.split(' ')[:-1]),i.split(' ')[-1].replace('\n','')] for i in open('src.txt','r').readlines()]
+def srcwriter(src):
+    open('src.txt','w').writelines([i[0]+' '+i[1]+'\n' for i in src])
+def update():
+    src=srcftn()
+    #print(src)
+    for info in src:
+        mytoon=toon(info[1],info[0])
+        mytoon.download()
+        mytoon.page_html()
+        mytoon.index_html()
+    homepagemaker()
 class toon:
     def __init__(self, option, query):
         self.option = option
-
+        res=search(query,option)
+        self.real_title=res[0]
+        info=res[1]
+        
         if option == 'newtoki':
-            res = search(query)
-            info = res[1]
-            self.real_title = res[0]
-            # self.title=res[0].replace(' ', '_')
             self.address, self.page_addresses, self.page_titles, self.title, self.thumb, self.description, self.like = self.newtoki_toontopages(
                 info)
+            print(self.title,self.option,self.address,self.like)
         if option == 'tkor':
-            valid = not "존재하지 않는 게시판입니다." in requests.get(tkor_domain + "/" + query.replace(' ', '_')).text
-            while not valid:
-                query = input('웹툰 제목이 잘못되었거나 특수문자 등의 이유로 주소 상 제목이 잘못되었습니다. 다시 시도해보세요 : ')
-                valid = not "존재하지 않는 게시판입니다." in requests.get(tkor_domain + "/" + query.replace(' ', '_')).text
-            self.real_title = query
-            self.title = query.replace(' ', '_')
+            # valid = not "존재하지 않는 게시판입니다." in req(tkor_domain + "/" + query.replace(' ', '_')).text
+            # while not valid:
+            #     query = input('웹툰 제목이 잘못되었거나 특수문자 등의 이유로 주소 상 제목이 잘못되었습니다. 다시 시도해보세요 : ')
+            #     valid = not "존재하지 않는 게시판입니다." in req(tkor_domain + "/" + query.replace(' ', '_')).text
+            self.title = info
             self.address, self.page_addresses, self.page_titles, self.thumb, self.authors, self.description = self.tkor_toontopages(
-                query)
+                info)
+            print(self.title,self.option,self.address,self.authors)
         # print(repr(self.title))
+        
         foldermaker('info')
         foldermaker(self.title)
         foldermaker(os.path.join(self.title, 'out'))
@@ -159,17 +212,16 @@ class toon:
 
     def newtoki_toontopages(self, toon_id):
         toon_address = newtoki_domain + '/webtoon/' + str(toon_id)
-        response = requests.get(toon_address)
+        response = req(toon_address)
         soup = bs(response.text, 'html.parser')
         toons = soup.select('form div ul li div a')
         page_addresses = [newtoki_domain + '/webtoon/' + i['href'].split('/')[4] for i in toons]
         page_addresses.reverse()
-        page_titles = [(' '.join(i.text.strip().split('\n')[-1].split(' ')[:-1]).strip().replace(' ', '_')) for i in
-                       toons]
+        page_titles = [filenamer(' '.join(i.text.strip().split('\n')[-1].split(' ')[:-1]).strip()) for i in toons]
         page_titles.reverse()
-        toon_title = soup.select(
+        toon_title = filenamer(soup.select(
             '#content_wrapper > div.content > div > div.view-wrap > section > article > div.view-title > div > div > div.col-sm-8 > div:nth-child(1) > span > b')[
-            0].text.strip().replace(' ', '_')
+            0].text.strip())
         des = soup.select(
             '#content_wrapper > div.content > div > div.view-wrap > section > article > div.view-title > div > div > div.col-sm-8 > div:nth-child(2) > p')[
             0].text
@@ -178,16 +230,15 @@ class toon:
         thumb = soup.select(
             '#content_wrapper > div.content > div > div.view-wrap > section > article > div.view-title > div > div > div.col-sm-4 > div > div > img')[
             0]['src']
-        print(toon_address, toon_title, des, thumb)
+        #print(toon_address, toon_title, des, thumb)
         return toon_address, page_addresses, page_titles, toon_title, thumb, des, likes
 
     def tkor_toontopages(self, toon_title):
-        toon_title = toon_title.replace(' ', '_')
         toon_address = tkor_domain + "/" + toon_title  # if it doesnt work, replace space with _ in toon_title
-        soup = bs(requests.get(toon_address).text, 'html.parser')
+        soup = bs(req(toon_address).text, 'html.parser')
         page_addresses = [tkor_domain + i['data-role'] for i in
                           soup.find_all("td", {"class": "episode__index", 'name': 'view_list'})]
-        page_titles = [i['data-role'][1:-5].replace(' ', '_') for i in
+        page_titles = [filenamer(i['data-role'][1:-5]) for i in
                        soup.find_all("td", {"class": "episode__index", 'name': 'view_list'})]
         page_titles.reverse()
         page_addresses.reverse()
@@ -195,7 +246,7 @@ class toon:
             'src']
         auth = soup.find("span", "bt_data").text
         des = soup.find("td", "bt_over").text
-        print(toon_address, toon_title, des, thumb)
+        #print(toon_address, toon_title, des, thumb)
         return toon_address, page_addresses, page_titles, thumb, auth, des
 
     def index_html(self):
@@ -214,7 +265,7 @@ class toon:
         </a>""" % (j + 1, page_titles[j], j + 1, j + 1)
             try:
                 auth = open("info/%s.txt" % toon_title, mode="r", encoding='UTF-8').read()
-            except:
+            except ValueError:
                 print(toon_title)
                 raise
             temp = open("page_index_template.html", mode="r", encoding='UTF-8').read() % (
@@ -238,6 +289,7 @@ class toon:
         start = kwargs.get('start', 1)
         end = kwargs.get('end', len(page_addresses))
         already = every_already_counter(toon_title, page_titles)
+        print(already)
         start -= 1  # in list's index
         # this part can cause error, so if something happends remove this part
         if not overwrite:
@@ -281,7 +333,7 @@ class page:
             self.image_addresses, self.image_titles = self.newtoki_pagetoimages(page_address, page_title)
 
     def tkor_pagetoimages(self, page_address, page_title):
-        soup = bs(requests.get(page_address).text, 'html.parser')
+        soup = bs(req(page_address).text, 'html.parser')
         scripts = soup.find_all('script')
         matching = [str(s) for s in scripts if "toon_img" in str(s)]
         encryptedtext = matching[0].split("toon_img = '")[1].split("'")[0]
@@ -297,20 +349,27 @@ class page:
         return image_addresses, image_titles
 
     def newtoki_pagetoimages(self, page_address, page_title):
-        response = requests.get(page_address)
+        response = req(page_address)
         soup = bs(response.text, 'html.parser')
         script = soup.select('section article div script')[0]
         encrypted = (''.join(str(script).split("';\nhtml_data+=\'")[1:-1])).split('.')[:-1]
         temp = ''
         for j in encrypted:
-            temp += bytearray.fromhex(j).decode()
+            try: temp += bytearray.fromhex(j).decode(errors='replace')
+            except: print(page_address,page_title,script,'페이지 에러'); open('script.html','w').write(str(script)); return [],[]
+        
         soup = bs(temp, 'html.parser')
         images = soup.find_all('img', {'src': "/img/loading-image.gif"})
-        attrkey = list(images[0].attrs.keys())[1]
-        image_addresses = [k[attrkey] for k in images]
-        for k in image_addresses:
-            if k.endswith('.gif'):
-                image_addresses.remove(k)
+        attrkeys = list(images[0].attrs.keys())
+        for ke in attrkeys:
+            if ke.startswith('data'):
+                attrkey=ke
+        temp_image_addresses = [k[attrkey] for k in images]
+        image_addresses=[]
+        for k in temp_image_addresses:
+            if not k.endswith('.gif'):
+                image_addresses.append(k)
+        #print(image_addresses)
         image_titles = [page_title + '_' + str(j) + '.jpg' for j in range(1, len(image_addresses) + 1)]
         return image_addresses, image_titles
 
@@ -321,9 +380,7 @@ class page:
             file_name = os.path.join('.', toon_title, 'out', image_titles[i])
             if not os.path.isfile(file_name):
                 with open(file_name, "wb") as file:
-                    response = requests.get(image_addresses[i])
+                    response = req(image_addresses[i])
                     file.write(response.content)
-
-
 if __name__ == "__main__":
-    print(search(input()))
+    update()
