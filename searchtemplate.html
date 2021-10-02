@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Isotope | Filter &amp; Search</title>
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css'><link rel="stylesheet" href="./searchstyle.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="container-fluid">
+  <div class="row">
+  
+		<div class="col-xs-7 col-sm-6">
+      <div class="button-group filters-button-group text-center" id="filters">
+				<button class="button is-checked" data-filter="*">all</button>
+        %s
+			</div>
+    </div>
+
+		<div class="col-xs-2">
+			<a href="#" id="quicksort" class="quicksort" data-sort-value="name">
+				<i class="fa fa-sort-alpha-asc" aria-hidden="true"></i>
+			</a>
+		</div>
+		
+		<div class="col-xs-3 col-sm-4">
+      <div class="search input-group">
+        <input type="text" class="form-control quicksearch" id="quicksearch" placeholder="Search" />
+      </div>
+    </div>
+		
+  </div>
+  
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-2">
+      <div id="container">
+        %s
+      
+      </div>
+    </div>
+  </div>
+</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script>
+<script src='https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js'></script><script  src="./searchscript.js"></script>
+
+</body>
+</html>
