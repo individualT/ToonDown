@@ -1,3 +1,4 @@
+#토스에서 사용되는 어투를 사용해보았어요. 이렇게하면 UX가 좋아진다고 해서요.
 import errno
 import requests
 import base64
@@ -10,14 +11,20 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 from time import time as timer
 from shutil import copyfile
-
+from PIL import Image
+from tqdm import tqdm
+from PIL import ImageFile
+import argparse
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 cpunum=cpu_count()
-measurepop='as_good' #'as_view'
+measurepop='as_good' #'as_view' , 아무것도 안하면 최신순
 overwrite = False #각 회차의 각 이미지가 존재하는지 일일히 다 체크해요. False라면 이미지가 없는 가장 오래된 회차의 직전 회차부터 체크를 시작하고, 이전은 생략해요.
 loggin = False
 domains = {i[0]:i[1] for i in [j.replace('\n','').split(' ') for j in open('domain.txt', 'r').readlines()]}
-newtoki_domain = domains['newtoki_domain'] #requests.get('https://newtoki13.org').url[:-1] 
+newtoki_domain = domains['newtoki_domain'] #requests.get('https://newtoki13.org').url[:-1]
 tkor_domain = domains['tkor_domain']
+def soupmaker(url):
+    return bs(requests.get(url).text,'html.parser')
 def popnewtoki(measurepop,nsfw,count=30):
     page=int(count/96)+1
     if nsfw:
@@ -26,32 +33,41 @@ def popnewtoki(measurepop,nsfw,count=30):
         urls=[f'https://newtoki101.com/webtoon/p{i}?sst={measurepop}&sod=desc' for i in range(1,page+1)]
     results=[]
     for url in urls:
-        soup=bs(req(url).text,'html.parser')
+        soup=soupmaker(url)
         for i in range(1,97):
             results.append([soup.select_one(f'#webtoon-list-all > li:nth-child({i}) > div > div > div > div.img-wrap > div > a')['href'].split('/')[4],soup.select_one(f'#webtoon-list-all > li:nth-child({i}) > div > div > div > div.img-wrap > div > div > a > span').text])
     return results[:count]
-def downloadpopularnewtoki(measurepop,nsfw,count=30):
+def downloadpopularnewtoki(measurepop,nsfw,count=30,muzisungYes=False):
     src=srcftn()
     alreadywebtoons=[i[0] for i in src]
+    alreadywebtoonstitle=[i[2] for i in src]
     pops=popnewtoki(measurepop,nsfw,count)
     for inf in pops:
         if not inf[1] in alreadywebtoons:
-            proceed=input(f'뉴토끼에서 웹툰 {inf[1]} ({inf[0]})를 다운받아요. 진행할까요? [Y/n]')
-            if not proceed.lower()=='n':
+            mytoon=toon('newtoki',inf[0])
+            if not mytoon.title in alreadywebtoonstitle:
+                if muzisungYes:
+                    proceed='Y'
+                    print(f'뉴토끼에서 웹툰 {inf[1]} ({inf[0]})를 다운받아요.')
+                else:
+                    proceed=input(f'뉴토끼에서 웹툰 {inf[1]} ({inf[0]})를 다운받아요. 진행할까요? [Y/n]')
+                if not proceed.lower()=='n':
+                    print(mytoon.title,mytoon.real_title)
+                    assert mytoon.real_title==inf[1]
+                    src.append([mytoon.real_title,'newtoki',mytoon.title])
+                    srcwriter(src)
+                    homepagemaker()
+                    searchindex()
+                    mytoon.download()
+                    mytoon.page_html()
+                    mytoon.index_html()
 
-                mytoon=toon('newtoki',inf[0]) #inf[1]도 가능
-                
-                print(mytoon.title,mytoon.real_title)
-                assert mytoon.real_title==inf[1]
-                src.append([inf[1],'newtoki'])
-                srcwriter(src)
-                mytoon.download()
-                mytoon.page_html()
-                mytoon.index_html()
-                homepagemaker()
+                else:
+                    print(f'{inf[1]} 웹툰 다운로드가 취소되었어요')
+            else:
+                print(f'{inf[1]} 웹툰은 이미 있어요')
         else:
             print(f'{inf[1]} 웹툰은 이미 있어요')
-    update()
 
 
 
@@ -68,7 +84,7 @@ def req(url):
     print('max try exceeded',maxtr,url)
     assert False
 def searchnewtoki(query):
-    soup = bs(req(newtoki_domain + '/webtoon?stx=' + query.replace(' ', '+').replace('/',' ')).text, 'html.parser')
+    soup = soupmaker(newtoki_domain + '/webtoon?stx=' + query.replace(' ', '+').replace('/',' ').replace('(',' ').replace(')',' '))
     lis = soup.find('ul', {'id': 'webtoon-list-all'}).findAll('li')
     results = {}
     for li in lis:
@@ -80,7 +96,7 @@ def searchnewtoki(query):
         a = searchnewtoki(input('검색어 : '))
         return a
     print(results)
-    print('추천 : ', list(results.keys()))
+    print('추천 : ', [f"{i+1}. {list(results.keys())[i]}" for i in range(len(list(results.keys())))])
     inp=input((f'{query}에 대한 검색결과가 없어요. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
     if inp=='' and len(results)==1:
         return list(results.keys())[0],results[list(results.keys())[0]]
@@ -90,8 +106,9 @@ def searchnewtoki(query):
         return inp,results[inp]
     else:
         return searchnewtoki(inp)
+
 def searchtkor(query):
-    soup = bs(req(tkor_domain + '/bbs/search.php?stx=' + query.replace(' ', '+').replace('/',' ')).text, 'html.parser')
+    soup = soupmaker(tkor_domain + '/bbs/search.php?stx=' + query.replace(' ', '+').replace('/',' ').replace('(',' ').replace(')',' '))
     results={i.find('h3').text:i['href'][1:] for i in soup.findAll('a',{'id':'title'})}
     if query in results.keys():
         return query, results[query]
@@ -100,16 +117,18 @@ def searchtkor(query):
         a = searchtkor(input('검색어 : '))
         return a
     print(results)
-    print('추천 : ', list(results.keys()))
+    print('추천 : ', [f"{i+1}. {list(results.keys())[i]}" for i in range(len(list(results.keys())))])
     inp=input((f'{query}에 대한 검색결과가 없어요. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
-    if inp.isnumeric():
+    if inp=='' and len(results)==1:
+        return list(results.keys())[0],results[list(results.keys())[0]]
+    elif inp.isnumeric():
         return list(results.keys())[int(inp)-1],results[list(results.keys())[int(inp)-1]]
     elif inp in results.keys():
         return inp,results[inp]
     else:
         return searchtkor(inp)
 def search(query,opt):
-    
+
     if opt=='newtoki':
         return searchnewtoki(query)
     elif opt=='tkor':
@@ -120,7 +139,39 @@ def search(query,opt):
 def log(message):
     with open('log.txt', 'a') as logfile:
         logfile.write(str(dt.now()) + "\t" + message + '\n')
-
+def combineImage(full_width,full_height,page_title,image_list,index,toon_title):
+    canvas = Image.new('RGB', (full_width, full_height), 'white')
+    output_height = 0
+    for im in image_list:
+        width, height = im.size
+        if width<0.9*full_width:
+            wpercent = (full_width/float(width))
+            hsize = int((float(height)*float(wpercent)))
+            im = im.resize((full_width,hsize), Image.ANTIALIAS)
+        width, height = im.size
+        canvas.paste(im, (0, output_height))
+        output_height += height
+    canvas.save(toon_title+'/out/'+page_title+"_combined_"+str(index)+'.jpg')
+    #print(page_title+'_병합됨_'+str(index)+'.jpg')
+def listImage(page_title,image_value,q,toon_title):
+    full_width, full_height,index = 0, 0, 1
+    image_list = []
+    for i in image_value:
+        im = Image.open(os.path.join('.',toon_title,'out',page_title+"_"+str(i)+'.jpg'))
+        #print(page_title+"_"+str(i)+'.jpg 병합중')
+        width, height = im.size
+        if full_height+height > 65000:
+            combineImage(full_width,full_height,page_title,image_list,index,toon_title)
+            index = index + 1
+            image_list = []
+            full_width, full_height = 0, 0
+        image_list.append(im)
+        full_width = max(full_width, width)
+        full_height += height
+    combineImage(full_width,full_height,page_title,image_list,index,toon_title)
+    # for i in image_value:
+    #     os.remove(os.path.join(toon_title+'/out/'+page_title+"_"+str(i)+'.jpg'))
+    #print(page_title+' 삭제중')
 def filenamer(filename):
     return re.sub('[\*?|]','',filename).replace(' ', '_').replace('/','-').replace(':','-').replace('"',"'").replace('<','[').replace('>',']')
 hdr = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3', 'Accept-Encoding': 'none', 'Accept-Language': 'en-US,en;q=0.8', 'Connection': 'keep-alive'}
@@ -135,17 +186,21 @@ def every_already_counter(toon_title, page_titles):
     file_list = os.listdir(toon_title + '/out')
     alreadys = [0] * len(page_titles)
     for i in file_list:
-        for j in range(len(page_titles)):
-            if i.startswith(page_titles[j]):
-                alreadys[j] += 1
+        spli=i.split('_')
+        assert len(spli)==2
+        assert spli[1].replace('.jpg','').isnumeric()
+        alreadys[int(spli[0])-1]+=1
     return alreadys
 
 
-def already_counter(toon_title, page_title):
+def already_counter(toon_title, page_index):
     file_list = os.listdir(toon_title + '/out')
     already = 0
     for i in file_list:
-        if i.startswith(page_title):
+        spli=i.split('_')
+        assert len(spli)==2
+        assert spli[1].replace('.jpg','').isnumeric()
+        if int(spli[0])-1==page_index:
             already += 1
     return already
 
@@ -167,17 +222,18 @@ def direc():
 
 
 def homepagemaker():
-    toons = direc()
+    src=srcftn()
+    #toons = direc()
     menus = ""
     ind = ""
-    for i in toons:
+    for i in src:
         try:
-            auth = open("info/%s.txt" % i, mode="r", encoding='UTF-8').read()
+            auth = open("info/%s.txt" % i[2], mode="r", encoding='UTF-8').read()
         except:
             print(i)
             raise
-        ind += '"%s",' % i
-        toonname = i.replace("-", " ").replace('_',' ')
+        ind += '"%s",' % i[2]
+        toonname = i[0] #i.replace("-", " ").replace('_',' ')
         menus += """
                 <div class="column-xs-12 column-md-4" id="%s" onclick='location.href ="./%s"'>
     <figure class="img-container">
@@ -191,7 +247,7 @@ def homepagemaker():
         <h3 class="category">%s</h3>
         </span>
     </figure>
-    </div>""" % (i, i, "./info/%s.jpg" % i, i + 'a', toonname, auth, i + 'b', toonname, auth)
+    </div>""" % (i[2], i[2], "./info/%s.jpg" % i[2], i[2] + 'a', toonname, auth, i[2] + 'b', toonname, auth)
     ind = ind[:-1]
     temp = open("index_template.html", "r", encoding='UTF-8').read() % (menus, ind)
     with open("intro.html", mode='w', encoding='UTF-8') as indexhtml:
@@ -210,46 +266,74 @@ def foldermaker(folder):
             if logging: log('could not make folder %s- maybe due to permission; use chmod' % folder)
             raise
 def srcftn():
-    return [[' '.join(i.split(' ')[:-1]),i.split(' ')[-1].replace('\n','')] for i in open('src.txt','r').readlines()]
+    return [i.replace('\n','').split('\t') for i in open('src.txt','r',encoding='utf-8').readlines()]
 def srcwriter(src):
-    open('src.txt','w').writelines([i[0]+' '+i[1]+'\n' for i in src])
+    open('src.txt','w',encoding='utf-8').writelines(['\t'.join(i)+'\n' for i in src])
 def update():
     src=srcftn()
     #print(src)
-    for info in src:
-        mytoon=toon(info[1],info[0])
-        mytoon.download()
-        mytoon.page_html()
-        mytoon.index_html()
+    pbar=tqdm(src)
+    for info in pbar:
         
-        homepagemaker()
+        try: 
+            mytoon=toon(info[1],info[0])
+            pbar.set_description(f"<{info[0]}> 웹툰을 {info[1]}에서 업데이트 중이에요")
+            mytoon.download()
+            mytoon.page_html()
+            mytoon.index_html()
+            homepagemaker()
+            searchindex()
+        except: 
+            pbar.set_description(f"<{info[0]}> 웹툰은 {info[1]}에서 캡챠가 걸려있는것 같아요")
+        
+        
+def pagenumcounter(title):
+    pages=os.listdir(title)
+    res=0
+    for i in pages:
+        if not i in ['out','index.html']:
+            res+=1
+    return res
+def appendtoon(query,option):
+    mytoon=toon(option,query)
+    src=srcftn()
+    alreadytoons=[j[0] for j in src]
+    if not mytoon.real_title in alreadytoons:
+        src.append([mytoon.real_title,option,mytoon.title])
+        srcwriter(src)
+        print(f'{mytoon.real_title} 웹툰을 추가했어요')
+    else:
+        print(f'{mytoon.real_title} 웹툰은 이미 있어요. 업데이트 할게요')
+    mytoon.download()
+    mytoon.page_html()
+    mytoon.index_html()
+    homepagemaker()
     searchindex()
-
 def searchindex():
     buttons=""
     toons=''
     src=srcftn()
     colordict={'newtoki':'red','tkor':'blue'}
     for info in src:
-        mytoon=toon(info[1],info[0])
-        toons+='''<div onclick='location.href="%s"' class="element-item %s" data-isotope-sort-name="%s"><span>%d</span>%s</div>'''%('/'+mytoon.title,colordict[info[1]],mytoon.real_title,len(mytoon.page_titles),mytoon.real_title)
+        #mytoon=toon(info[1],info[0])
+        toons+='''<div onclick='location.href="%s"' class="element-item %s" data-isotope-sort-name="%s"><span>%d</span>%s</div>'''%('/'+info[2],colordict[info[1]],info[0],pagenumcounter(info[2]),info[0])
     for color in colordict:
         buttons+='''<button class="button" data-filter=".%s">%s</button>'''%(colordict[color],color)
-    open('index.html','w',encoding='utf-8').write(open('searchtemplate.html','r',encoding='utf-8').read()%(buttons,toons))
+    open('search.html','w',encoding='utf-8').write(open('searchtemplate.html','r',encoding='utf-8').read()%(buttons,toons))
 
 class toon:
     def __init__(self, option, query):
         self.option = option
         if not query.isnumeric():
-            
+
             res=search(query,option)
             self.real_title=res[0]
             info=res[1]
-            
+
             if option == 'newtoki':
                 self.address, self.page_addresses, self.page_titles, self.title, self.thumb, self.description, self.like,self.real_title = self.newtoki_toontopages(
                     info)
-                print(self.title,self.option,self.address,f'총 {len(self.page_titles)}화')
+                #print(self.title,self.option,self.address,f'총 {len(self.page_titles)}화')
             if option == 'tkor':
                 # valid = not "존재하지 않는 게시판입니다." in req(tkor_domain + "/" + query.replace(' ', '_')).text
                 # while not valid:
@@ -258,11 +342,11 @@ class toon:
                 self.title = info
                 self.address, self.page_addresses, self.page_titles, self.thumb, self.authors, self.description = self.tkor_toontopages(
                     info)
-                print(self.title,self.option,self.address,self.authors,f'총 {len(self.page_titles)}화')
+                #print(self.title,self.option,self.address,self.authors,f'총 {len(self.page_titles)}화')
         else:
             self.address, self.page_addresses, self.page_titles, self.title, self.thumb, self.description, self.like,self.real_title = self.newtoki_toontopages(query)
         # print(repr(self.title))
-        
+
         foldermaker('info')
         foldermaker(self.title)
         foldermaker(os.path.join(self.title, 'out'))
@@ -277,8 +361,7 @@ class toon:
 
     def newtoki_toontopages(self, toon_id):
         toon_address = newtoki_domain + '/webtoon/' + str(toon_id)
-        response = req(toon_address)
-        soup = bs(response.text, 'html.parser')
+        soup = soupmaker(toon_address)
         toons = soup.select('form div ul li div a')
         page_addresses = [newtoki_domain + '/webtoon/' + i['href'].split('/')[4] for i in toons]
         page_addresses.reverse()
@@ -287,7 +370,7 @@ class toon:
         real_title=soup.select(
             '#content_wrapper > div.content > div > div.view-wrap > section > article > div.view-title > div > div > div.col-sm-8 > div:nth-child(1) > span > b')[0].text.strip()
         toon_title = filenamer(real_title)
-        try: 
+        try:
             des = soup.select('#content_wrapper > div.content > div > div.view-wrap > section > article > div.view- title > div > div > div.col-sm-8 > div:nth-child(2) > p')[0].text
         except:
             des=''
@@ -300,7 +383,7 @@ class toon:
 
     def tkor_toontopages(self, toon_title):
         toon_address = tkor_domain + "/" + toon_title  # if it doesnt work, replace space with _ in toon_title
-        soup = bs(req(toon_address).text, 'html.parser')
+        soup = soupmaker(toon_address)
         page_addresses = [tkor_domain + i['data-role'] for i in
                           soup.find_all("td", {"class": "episode__index", 'name': 'view_list'})]
         page_titles = [filenamer(i['data-role'][1:-5]) for i in
@@ -322,7 +405,7 @@ class toon:
             for j in range(len(page_titles)):
                 tempa += """  <a href="./%d.html">
                 <article class="site">
-                        <h2 class="name">%s</h2> 
+                        <h2 class="name">%s</h2>
     <input class="checkbox" type="checkbox" id="%d" onclick='changecookie(this);'/>
     <label for="%d" style="position: absolute; right: 0px; top: 0px;">
     </label>
@@ -354,7 +437,7 @@ class toon:
         start = kwargs.get('start', 1)
         end = kwargs.get('end', len(page_addresses))
         already = every_already_counter(toon_title, page_titles)
-        print(already)
+        #print(already)
         start -= 1  # in list's index
         # this part can cause error, so if something happends remove this part
         if not overwrite:
@@ -378,9 +461,8 @@ class toon:
                 mp3filename = mp3
         with open(toon_title + '/' + str(page_index + 1) + ".html", mode="w", encoding='UTF-8') as file:
             tempa = ""
-            for j in range(1, already_counter(toon_title, page_title) + 1):
-                tempa += '<div style="font-size:0;"><img src="./out/' + page_title + '_' + str(
-                    j) + '.jpg" style="border:0px;margin:0px; width: 40%; height: auto;" alt="" ' \
+            for j in range(1, already_counter(toon_title, page_index) + 1):
+                tempa += f'<div style="font-size:0;"><img src="./out/{page_index+1}_{j}.jpg" style="border:0px;margin:0px; width: 40%; height: auto;" alt="" ' \
                          'style="vertical-align: top;"></div> '
             temp = open("page_template.html", "r", encoding='UTF-8').read() % (
                 page_title, page_index + 1, page_title, page_index, page_index + 2, mp3filename, tempa, toon_title,
@@ -397,12 +479,12 @@ class page:
         self.index = page_index
         self.toon_title = toon_title
         if option == 'tkor':
-            self.image_addresses, self.image_titles = self.tkor_pagetoimages(page_address, page_title)
+            self.image_addresses, self.image_titles = self.tkor_pagetoimages(page_address, page_title,page_index)
         if option == 'newtoki':
-            self.image_addresses, self.image_titles = self.newtoki_pagetoimages(page_address, page_title)
+            self.image_addresses, self.image_titles = self.newtoki_pagetoimages(page_address, page_title,page_index)
 
-    def tkor_pagetoimages(self, page_address, page_title):
-        soup = bs(req(page_address).text, 'html.parser')
+    def tkor_pagetoimages(self, page_address, page_title,page_index):
+        soup = soupmaker(page_address)
         scripts = soup.find_all('script')
         matching = [str(s) for s in scripts if "toon_img" in str(s)]
         encryptedtext = matching[0].split("toon_img = '")[1].split("'")[0]
@@ -415,25 +497,27 @@ class page:
             if realadd.startswith('/'):
                 realadd=tkor_domain+realadd
             if realadd.endswith('.gif'):
-                print(realadd,' was advertisement image')
+                print(realadd,' 는 광고 이미지였어요')
             else:
                 image_addresses.append(realadd)
+        image_titles = [str(page_index+1) + '_' + str(j) + '.jpg' for j in range(1, len(image_addresses) + 1)]
+        return image_addresses, image_titles
+    def tkr_pagetoimages(self, page_address, page_title):
+        image_addresses=[i.split('"')[0] for i in base64.b64decode(requests.get(page_address).text.split('tnimg')[2].split("'")[1]).decode('UTF-8').split('src="')[1:]]
         image_titles = [page_title + '_' + str(j) + '.jpg' for j in range(1, len(image_addresses) + 1)]
         return image_addresses, image_titles
-
-    def newtoki_pagetoimages(self, page_address, page_title):
-        response = req(page_address)
-        soup = bs(response.text, 'html.parser')
+    def newtoki_pagetoimages(self, page_address, page_title,page_index):
+        soup=soupmaker(page_address)
         script = soup.select('section article div script')[0]
         encrypted = (''.join(str(script).split("';\nhtml_data+=\'")[1:-1])).split('.')[:-1]
         temp = ''
         for j in encrypted:
             try: temp += bytearray.fromhex(j).decode(errors='replace')
             except: print(page_address,page_title,script,'페이지에 에러가 있는 것 같아요'); open('script.html','w').write(str(script)); return [],[]
-        
+
         soup = bs(temp, 'html.parser')
         images = soup.find_all('img', {'src': "/img/loading-image.gif"})
-        try: 
+        try:
             attrkeys = list(images[0].attrs.keys())
             for ke in attrkeys:
                 if ke.startswith('data'):
@@ -446,11 +530,11 @@ class page:
                 if not k.endswith('.gif'):
                     image_addresses.append(k)
                 else:
-                    print(k,'was advertisement image')
+                    print(k,'는 광고 이미지였어요')
             #print(image_addresses)
-            image_titles = [page_title + '_' + str(j) + '.jpg' for j in range(1, len(image_addresses) + 1)]
+            image_titles = [str(page_index+1) + '_' + str(j) + '.jpg' for j in range(1, len(image_addresses) + 1)]
             return image_addresses, image_titles
-        except: 
+        except:
             print(soup.find_all('img'))
             print(f'{page_title}({page_address})에 이미지가 없어요. 아마 휴재회차거나 그럴거에요')
             return [],[]
@@ -470,8 +554,9 @@ class page:
         start=timer()
         urls=[(os.path.join('.', toon_title, 'out', image_titles[i]),image_addresses[i]) for i in range(len(image_titles))]
         results = ThreadPool(cpunum).imap_unordered(fetch_url, urls)
-        for pa in tqdm(results,desc=f"{self.title} 다운로드를 시작해요"):
-            'a'
+        pbar=tqdm(results)
+        for pa in pbar:
+            pbar.set_description(f"{self.title} 다운로드 중이에요")
         print(f"{round(timer() - start,2)} 초가 걸렸어요")
         #old versions
         # print(image_titles)
@@ -482,4 +567,75 @@ class page:
         #             response = req(image_addresses[i])
         #             file.write(response.content)
 if __name__ == "__main__":
-    update()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--newtoki", help="뉴토끼",action="store_true")
+    parser.add_argument("-t", "--tkor", help="툰코",action="store_true")
+    parser.add_argument("-u", "--update", help="src.txt의 모든 웹툰을 업데이트해요",action="store_true")
+    parser.add_argument("-a", "--append",help="하나의 웹툰을 다운받아요. 띄어쓰기가 있다면 따옴표로 감싸세요")
+    parser.add_argument('-al', '--appendlist', nargs='+', default=[],help='여러개의 웹툰을 다운받아요. 여러개를 띄어쓰기로 구분해 나열하세요.')
+    parser.add_argument("-hp", "--homepage", help="액자식 홈페이지를 만들어요",action="store_true")
+    parser.add_argument("-si", "--searchindex", help="목록식 홈페이지를 만들어요",action="store_true")
+    parser.add_argument("-o", "--overwrite", help="이미지 하나씩 확인해요",action="store_true")
+    parser.add_argument("-Y", "--yestoall", help="무지성으로 확인절차 없이 다운해요",action="store_true")
+    parser.add_argument("-good", "--goodnewtoki", help="좋아요가 많은 뉴토끼 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-goodnsfw", "--goodnewtokinsfw", help="좋아요가 많은 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-view", "--viewnewtoki", help="조회수가 많은 뉴토끼 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-viewnsfw", "--viewnewtokinsfw", help="조회수가 많은 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-new", "--newnewtoki", help="최근에 나온 뉴토끼 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-newnsfw", "--newnewtokinsfw", help="최근에 나온 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
+    args = parser.parse_args()
+    overwrite=args.overwrite
+    if args.append!=None or args.appendlist!=[]:
+        if (not (args.newtoki or args.tkor)) or (args.newtoki and args.tkor):
+            inp=input('n 또는 t 옵션을 입력해주세요')
+            if inp in ['n','newtoki']:
+                opt='newtoki'
+            elif inp in ['t','tkor']:
+                opt='tkor'
+            else:
+                print('옵션이 틀렸어요')
+                raise
+        elif args.newtoki:
+            opt='newtoki'
+        else:
+            opt='tkor'
+        if args.append!=None:
+            appendtoon(args.append,opt)
+        if args.appendlist!=[]:
+            for i in args.appendlist:
+                appendtoon(i,opt)
+    if args.update:
+        update()
+    if args.homepage:
+        homepagemaker()
+    if args.searchindex:
+        searchindex()
+    if args.goodnewtoki!=None:
+        downloadpopularnewtoki('as_good',False,args.goodnewtoki,args.yestoall)
+    if args.goodnewtokinsfw!=None:
+        downloadpopularnewtoki('as_good',True,args.goodnewtokinsfw,args.yestoall)
+    if args.viewnewtoki!=None:
+        downloadpopularnewtoki('as_view',False,args.viewnewtoki,args.yestoall)
+    if args.viewnewtokinsfw!=None:
+        downloadpopularnewtoki('as_view',True,args.viewnewtokinsfw,args.yestoall)
+    if args.newnewtoki!=None:
+        downloadpopularnewtoki('',False,args.newnewtoki,args.yestoall)
+    if args.newnewtokinsfw!=None:
+        downloadpopularnewtoki('',True,args.newnewtokinsfw,args.yestoall)
+    # src=srcftn()
+    # for too in src:
+
+    #     try: 
+    #         mytoon=toon(too[1],too[0])
+    #         pagetitle=mytoon.page_titles
+    #         for j in range(len(pagetitle)):
+    #             print(pagetitle[j])
+    #             images=os.listdir(os.path.join('.',too[2],'out'))
+    #             for image in images:
+    #                 if pagetitle[j] in image and image.replace(pagetitle[j]+'_','')[:-4].isnumeric():
+    #                     #print(os.path.join('.',too[2],'out',image),os.path.join('.',too[2],'out',image.replace(pagetitle[j],str(j+1))))
+    #                     os.rename(os.path.join('.',too[2],'out',image),os.path.join('.',too[2],'out',image.replace(pagetitle[j],str(j+1))))
+    #     except: print('pass',too[0]); pass
+        
+
+

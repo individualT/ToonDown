@@ -1,93 +1,180 @@
-�������� newtoki
-� ��� newtoki
-�Ϻ� ���� newtoki
-�븮�� newtoki
-�츮 ����(ž��) newtoki
-�������� �ڸŵ� newtoki
-�絷 ó��� newtoki
-ģ�� ���� newtoki
-�������� newtoki
-����ü���� �������� ������ newtoki
-��� ���� ���� newtoki
-����, 30�� newtoki
-����ƽ ��Ƽ newtoki
-�������� newtoki
-���� �ȿ��� newtoki
-�������� �ٽú��� newtoki
-���귯�� �������� newtoki
-���� �����Ͽ� newtoki
-���� �����ϸ� �������� ���� �� newtoki
-������â�� newtoki
-�̰� ���� ���̾�? newtoki
-���п��� newtoki
-�׳����� ����� newtoki
-�������� ������ newtoki
-�������� ģ���� newtoki
-���Ž�Ÿ�׷� newtoki
-15�� tkor
-PC�� ���ŵ� tkor
-���� ���ϴ� ���� tkor
-�׳��� 11��Ƽ tkor
-���븮��Ʈ tkor
-�籸�� ����� tkor
-���� �� ���� tkor
-���� tkor
-���� ���� tkor
-���Ƹ� tkor
-������� tkor
-��Ż���� tkor
-���� tkor
-�����Ʈ tkor
-������ �ڵ� tkor
-������ �������� tkor
-���� �ż��� tkor
-���� ���� ���� tkor
-���۸��� �ϸ���Ÿ tkor
-���۸��� �ϸ��ϼ� tkor
-��м��� tkor
-������ tkor
-��ȭ�� tkor
-�� �Ѵ� ����ģ newtoki
-���� �Ѵ� ������ tkor
-���������� tkor
-������ tkor
-����ƮȨ tkor
-�ƺ�ģ�� tkor
-���� tkor
-��� �߾�? tkor
-� �׳� tkor
-���Ѽҳ� tkor
-�屸�� tkor
-�̵γ�! tkor
-�̿����� tkor
-���¿� Ŭ�� tkor
-�ϻ��Ȱ �����ϼ���? tkor
-������ �����ϱ� tkor
-����� tkor
-�˿� �� tkor
-�˿͹�(���ͽ�) newtoki
-������ ������ tkor
-����Ʈ ���� tkor
-��θ� Ȧ�� tkor
-���ε༭ tkor
-��Ʈ�Ͻ� tkor
-�ϼ��ϱ� tkor
-�ر� tkor
-�ķ��ڽ� tkor
-���ĺ��� tkor
-����� �Ŵ��� tkor
-�������� newtoki
-��� �־��? newtoki
-����ģ�� ������ ���� newtoki
-�̷�����! �輭�� newtoki
-���ǿ� ���� newtoki
-1/6 ��ģ newtoki
-�Դ� ���̶� ���մϴ� newtoki
-����������ȹ� newtoki
-�׿� �׿� �� newtoki
-���ϴ� ���� �� newtoki
-�������� �ɷ�! newtoki
-��� �߾� newtoki
-�ֵ��� ������ newtoki
-�ΰ��� ���� newtoki
-�� ȥ�ڸ� ������ newtoki
+여름방학	newtoki	여름방학
+어린 상사	newtoki	어린_상사
+일본 센세	newtoki	일본_센세
+대리부	newtoki	대리부
+우리 사이(탑툰)	newtoki	우리_사이(탑툰)
+새엄마의 자매들	newtoki	새엄마의_자매들
+사돈 처녀들	newtoki	사돈_처녀들
+친구 엄마	newtoki	친구_엄마
+작은전쟁	newtoki	작은전쟁
+여자체육대 수영부의 관리인	newtoki	여자체육대_수영부의_관리인
+재수 좋은 남자	newtoki	재수_좋은_남자
+마녀, 30세	newtoki	마녀,_30세
+새디스틱 뷰티	newtoki	새디스틱_뷰티
+순결한죄	newtoki	순결한죄
+버스 안에서	newtoki	버스_안에서
+무너지고 다시봐요	newtoki	무너지고_다시봐요
+러브러브 원더랜드	newtoki	러브러브_원더랜드
+모든건 합의하에	newtoki	모든건_합의하에
+룰을 위반하면 절정까지 가야 해	newtoki	룰을_위반하면_절정까지_가야_해
+일진동창녀	newtoki	일진동창녀
+이게 무슨 일이야?	newtoki	이게_무슨_일이야
+대학여우	newtoki	대학여우
+그남자의 자취방	newtoki	그남자의_자취방
+방주인은 전데요	newtoki	방주인은_전데요
+새엄마의 친구들	newtoki	새엄마의_친구들
+여신스타그램	newtoki	여신스타그램
+15분	tkor	15분
+PC방 여신들	tkor	PC방-여신들
+거절 못하는 여자	tkor	거절-못하는-여자
+그녀의 11센티	tkor	그녀의-11센티
+나노리스트	tkor	나노리스트
+당구장 사랑이	tkor	당구장-사랑이
+던전 속 사정	tkor	던전-속-사정
+동거	tkor	동거
+동네 누나	tkor	동네-누나
+동아리	tkor	동아리
+런어웨이	tkor	런어웨이
+렌탈걸즈	tkor	렌탈걸즈
+루저	tkor	루저
+룸메이트	tkor	룸메이트
+릴리스 코드	tkor	릴리스-코드
+만져서 봉인해제	tkor	만져서-봉인해제
+멋진 신세계	tkor	멋진-신세계
+몸에 좋은 남자	tkor	몸에-좋은-남자
+몽글몽글 하리스타	tkor	몽글몽글-하리스타
+몽글몽글 하리하숙	tkor	몽글몽글-하리하숙
+비밀수업	tkor	비밀수업
+새내기	tkor	새내기
+색화점	tkor	색화점
+선 넘는 여사친	newtoki	선_넘는_여사친
+선을 넘는 스무살	tkor	선을-넘는-스무살
+섹서사이즈	tkor	섹서사이즈
+스무살	tkor	스무살
+스위트홈	tkor	스위트홈
+아빠친구	tkor	아빠친구
+약점	tkor	약점
+얘랑 했어?	tkor	얘랑-했어
+어린 그녀	tkor	어린-그녀
+엽총소년	tkor	엽총소년
+욕구왕	tkor	욕구왕
+이두나!	tkor	이두나
+이웃사촌	tkor	이웃사촌
+이태원 클라쓰	tkor	이태원-클라쓰
+일상생활 가능하세요?	tkor	일상생활-가능하세요
+일진녀 과외하기	tkor	일진녀-과외하기
+재수생	tkor	재수생
+죄와 벌	tkor	죄와-벌
+죄와벌(투믹스)	newtoki	죄와벌(투믹스)
+집주인 딸내미	tkor	집주인-딸내미
+퍼펙트 하프	tkor	퍼펙트-하프
+페로몬 홀릭	tkor	페로몬-홀릭
+프로듀서	tkor	프로듀서
+피트니스	tkor	피트니스
+하숙일기	tkor	하숙일기
+해금	tkor	해금
+후레자식	tkor	후레자식
+훔쳐보기	tkor	훔쳐보기
+히어로 매니저	tkor	히어로-매니저
+층간소음	newtoki	층간소음
+빈방 있어요?	newtoki	빈방_있어요
+남사친이 좋아진 이유	newtoki	남사친이_좋아진_이유
+이러지마! 김서방	newtoki	이러지마!_김서방
+도피오 센소	newtoki	도피오_센소
+1/6 여친	newtoki	1-6_여친
+입대 전이라 급합니다	newtoki	입대_전이라_급합니다
+비밀유지보안법	newtoki	비밀유지보안법
+그와 그와 그	newtoki	그와_그와_그
+폐하는 나의 것	newtoki	폐하는_나의_것
+딸도둑이 될래!	newtoki	딸도둑이_될래!
+얘랑 했어	newtoki	얘랑_했어
+쌍둥이 레시피	newtoki	쌍둥이_레시피
+민감한 문제	newtoki	민감한_문제
+나 혼자만 레벨업	newtoki	나_혼자만_레벨업
+수희0(tngmlek0)	tkor	수희0-tngmlek0
+도굴왕	newtoki	도굴왕
+우리사이	newtoki	우리사이
+교생실습	newtoki	교생실습
+몰래 하는 사이	newtoki	몰래_하는_사이
+하지점	newtoki	하지점
+친구랑 하면 안돼	newtoki	친구랑_하면_안돼
+동생의 의무	newtoki	동생의_의무
+우리동네 비뇨기과	newtoki	우리동네_비뇨기과
+Retry: 다시 한번 최강 신선으로	newtoki	Retry-_다시_한번_최강_신선으로
+나를 달래줘	newtoki	나를_달래줘
+배덕의 밤	newtoki	배덕의_밤
+유실물	newtoki	유실물
+나의 아저씨	newtoki	나의_아저씨
+어차피 우리팀은 꼴찌야	newtoki	어차피_우리팀은_꼴찌야
+오늘의 섹스는 성공할 수 있을까?	newtoki	오늘의_섹스는_성공할_수_있을까
+조카딸	newtoki	조카딸
+전처와의 동거	newtoki	전처와의_동거
+S플라워	newtoki	S플라워
+너의 사정은	newtoki	너의_사정은
+여친이 좀비!	newtoki	여친이_좀비!
+공과 사를 구분하자	newtoki	공과_사를_구분하자
+밝히는 용사님	newtoki	밝히는_용사님
+젖동냥	newtoki	젖동냥
+성실한 민혁씨	newtoki	성실한_민혁씨
+아빠는 주인님	newtoki	아빠는_주인님
+팀장님 보고섭니다	newtoki	팀장님_보고섭니다
+누나의 성교육	newtoki	누나의_성교육
+하드코어 바닐라	newtoki	하드코어_바닐라
+팬티노트	newtoki	팬티노트
+던전의 주인님	newtoki	던전의_주인님
+대학, 오늘	newtoki	대학,_오늘
+음란한 소꿉장난	newtoki	음란한_소꿉장난
+내 아내는 둘이다	newtoki	내_아내는_둘이다
+내 방에 사는 여자	newtoki	내_방에_사는_여자
+그녀들의 보금자리	newtoki	그녀들의_보금자리
+가출가족	newtoki	가출가족
+환희택배	newtoki	환희택배
+주정	newtoki	주정
+배달이요	newtoki	배달이요
+자매와 새아버지	newtoki	자매와_새아버지
+더 게임 - 페이탈 닥터	newtoki	더_게임_-_페이탈_닥터
+은혜네 슈퍼	newtoki	은혜네_슈퍼
+대치동 로맨스	newtoki	대치동_로맨스
+친구, 여자친구	newtoki	친구,_여자친구
+캠퍼스 라이브	newtoki	캠퍼스_라이브
+가정교사	newtoki	가정교사
+오아시스	newtoki	오아시스
+노량진에서 스터디 할까	newtoki	노량진에서_스터디_할까
+관록의 제수씨	newtoki	관록의_제수씨
+천일의 아내	newtoki	천일의_아내
+누구랑 했을까?	newtoki	누구랑_했을까
+잠깐 사정이 있습니다	newtoki	잠깐_사정이_있습니다
+퇴근, 할 거야?	newtoki	퇴근,_할_거야
+크고 아름다워(봄툰)	newtoki	크고_아름다워(봄툰)
+친구	newtoki	친구
+미남이시네요	newtoki	미남이시네요
+며느리(투믹스)	newtoki	며느리(투믹스)
+서는 여자	newtoki	서는_여자
+수상한 알바	newtoki	수상한_알바
+꽃을 든 여자	newtoki	꽃을_든_여자
+하녀초희	newtoki	하녀초희
+합방 할래요?	newtoki	합방_할래요
+하이텐션	newtoki	하이텐션
+홀인원	newtoki	홀인원
+도화	newtoki	도화
+물이 넘쳐요	newtoki	물이_넘쳐요
+A급 며느리	newtoki	A급_며느리
+남매사이	newtoki	남매사이
+그저, 그녀	newtoki	그저,_그녀
+심야의 PC방	newtoki	심야의_PC방
+엄마는 여대생	newtoki	엄마는_여대생
+순정녀 타락계획	newtoki	순정녀_타락계획
+여동생이지만 괜찮아	newtoki	여동생이지만_괜찮아
+공공의 이익	newtoki	공공의_이익
+소꿉친구	newtoki	소꿉친구
+스퍼맨	newtoki	스퍼맨
+아나운서양	newtoki	아나운서양
+이웃집 유부녀는 외계인	newtoki	이웃집_유부녀는_외계인
+해녀	newtoki	해녀
+죽어도 공무원	newtoki	죽어도_공무원
+죽이는여자	newtoki	죽이는여자
+몸게임	newtoki	몸게임
+우리집에 왜 왔니	newtoki	우리집에_왜_왔니
+초인종이 울리면 5초만에	newtoki	초인종이_울리면_5초만에
+육체의 교실	newtoki	육체의_교실
+해변의 여신들	newtoki	해변의_여신들
