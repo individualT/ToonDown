@@ -450,8 +450,8 @@ class toon:
             if not temppage.image_addresses==[]:
                 temppage.download()
             else:
-                copyfile(f'info/{self.title}.jpg',os.path.join('.', toon_title, 'out', page_titles[page_index]+'_1.jpg'))
-                print('이미지가 없어서 썸네일로 대신했어요.',os.path.join('.', toon_title, 'out', page_titles[page_index]+'_1.jpg'))
+                copyfile(f'info/{self.title}.jpg',os.path.join('.', toon_title, 'out', f'{page_index+1}_1.jpg'))
+                print('이미지가 없어서 썸네일로 대신했어요.',os.path.join('.', toon_title, 'out', f'{page_index+1}_1.jpg'))
             self.html(toon_title, page_titles[page_index], page_index)
 
     def html(self, toon_title, page_title, page_index):
