@@ -1,2 +1,2 @@
-tkor_domain https://tkor.cfd
-newtoki_domain https://newtoki101.com
+tkor_domain https://tkor.house
+newtoki_domain https://newtoki113.com

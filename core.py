@@ -23,6 +23,11 @@ loggin = False
 domains = {i[0]:i[1] for i in [j.replace('\n','').split(' ') for j in open('domain.txt', 'r').readlines()]}
 newtoki_domain = domains['newtoki_domain'] #requests.get('https://newtoki13.org').url[:-1]
 tkor_domain = domains['tkor_domain']
+def imageparse(imagename):
+    spli=imagename.replace('.jpg','').split('_')
+    if len(spli)!=2 or not (spli[0].isnumeric() and spli[1].isnumeric()):
+        return False
+    return int(spli[0]),int(spli[1])
 def soupmaker(url):
     return bs(requests.get(url).text,'html.parser')
 def popnewtoki(measurepop,nsfw,count=30):
@@ -95,7 +100,6 @@ def searchnewtoki(query):
         print(f'{query}에 대한 검색결과가 없어요. 다른 검색어로 검색해보세요.')
         a = searchnewtoki(input('검색어 : '))
         return a
-    print(results)
     print('추천 : ', [f"{i+1}. {list(results.keys())[i]}" for i in range(len(list(results.keys())))])
     inp=input((f'{query}에 대한 검색결과가 없어요. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
     if inp=='' and len(results)==1:
@@ -116,7 +120,6 @@ def searchtkor(query):
         print(f'{query}에 대한 검색결과가 없어요. 다른 검색어로 검색해보세요.')
         a = searchtkor(input('검색어 : '))
         return a
-    print(results)
     print('추천 : ', [f"{i+1}. {list(results.keys())[i]}" for i in range(len(list(results.keys())))])
     inp=input((f'{query}에 대한 검색결과가 없어요. 위중 하나의 번호 혹은 이름을 골라 입력하거나, 다른 검색어를 입력해보세요.'))
     if inp=='' and len(results)==1:
@@ -182,14 +185,13 @@ def download(url, file_name):
             file.write(response.content)
 
 
-def every_already_counter(toon_title, page_titles):
+def every_already_counter(toon_title, page_titles_len):
     file_list = os.listdir(toon_title + '/out')
-    alreadys = [0] * len(page_titles)
+    alreadys = [0] * page_titles_len
     for i in file_list:
-        spli=i.split('_')
-        assert len(spli)==2
-        assert spli[1].replace('.jpg','').isnumeric()
-        alreadys[int(spli[0])-1]+=1
+        imageparsed=imageparse(i)
+        assert imageparsed
+        alreadys[imageparsed[0]-1]+=1
     return alreadys
 
 
@@ -197,10 +199,9 @@ def already_counter(toon_title, page_index):
     file_list = os.listdir(toon_title + '/out')
     already = 0
     for i in file_list:
-        spli=i.split('_')
-        assert len(spli)==2
-        assert spli[1].replace('.jpg','').isnumeric()
-        if int(spli[0])-1==page_index:
+        imageparsed=imageparse(i)
+        assert imageparsed
+        if imageparsed[0]-1==page_index:
             already += 1
     return already
 
@@ -267,15 +268,15 @@ def foldermaker(folder):
             raise
 def srcftn():
     return [i.replace('\n','').split('\t') for i in open('src.txt','r',encoding='utf-8').readlines()]
+
 def srcwriter(src):
     open('src.txt','w',encoding='utf-8').writelines(['\t'.join(i)+'\n' for i in src])
-def update():
+def update(opt='all'):
     src=srcftn()
     #print(src)
     pbar=tqdm(src)
     for info in pbar:
-        
-        try: 
+        if opt=='all' or opt==info[1]:
             mytoon=toon(info[1],info[0])
             pbar.set_description(f"<{info[0]}> 웹툰을 {info[1]}에서 업데이트 중이에요")
             mytoon.download()
@@ -283,9 +284,22 @@ def update():
             mytoon.index_html()
             homepagemaker()
             searchindex()
-        except: 
-            pbar.set_description(f"<{info[0]}> 웹툰은 {info[1]}에서 캡챠가 걸려있는것 같아요")
+        # except: 
+        #     pbar.set_description(f"<{info[0]}> 웹툰은 {info[1]}에서 캡챠가 걸려있는것 같아요")
         
+def updatehtml():
+    src=srcftn()
+    #print(src)
+    pbar=tqdm(src)
+    for info in pbar:
+        mytoon=toon(info[1],info[0])
+        pbar.set_description(f"<{info[0]}> 웹툰을 {info[1]}에서 html만 업데이트 중이에요")
+        mytoon.page_html()
+        mytoon.index_html()
+        homepagemaker()
+        searchindex()
+        # except: 
+        #     pbar.set_description(f"<{info[0]}> 웹툰은 {info[1]}에서 캡챠가 걸려있는것 같아요")
         
 def pagenumcounter(title):
     pages=os.listdir(title)
@@ -297,13 +311,15 @@ def pagenumcounter(title):
 def appendtoon(query,option):
     mytoon=toon(option,query)
     src=srcftn()
-    alreadytoons=[j[0] for j in src]
+    alreadytoons={j[0]:j[1] for j in src}
     if not mytoon.real_title in alreadytoons:
         src.append([mytoon.real_title,option,mytoon.title])
         srcwriter(src)
         print(f'{mytoon.real_title} 웹툰을 추가했어요')
     else:
         print(f'{mytoon.real_title} 웹툰은 이미 있어요. 업데이트 할게요')
+        mytoon=toon(alreadytoons[mytoon.real_title],mytoon.real_title)    
+        print(every_already_counter(mytoon.title,len(mytoon.page_titles)))
     mytoon.download()
     mytoon.page_html()
     mytoon.index_html()
@@ -358,6 +374,9 @@ class toon:
             intro.write(" ")
             intro.write(self.description)
             intro.close()
+    def intro(self):
+        with open("info/%s.txt" % self.title, mode="r", encoding='UTF-8') as intro:
+            return intro.read()
 
     def newtoki_toontopages(self, toon_id):
         toon_address = newtoki_domain + '/webtoon/' + str(toon_id)
@@ -436,7 +455,7 @@ class toon:
         option = self.option
         start = kwargs.get('start', 1)
         end = kwargs.get('end', len(page_addresses))
-        already = every_already_counter(toon_title, page_titles)
+        already = every_already_counter(toon_title, len(page_titles))
         #print(already)
         start -= 1  # in list's index
         # this part can cause error, so if something happends remove this part
@@ -496,6 +515,8 @@ class page:
             realadd=add.split('"')[0]
             if realadd.startswith('/'):
                 realadd=tkor_domain+realadd
+            if 'toonkor.com' in realadd:
+                realadd=realadd.replace('https://www.toonkor.com',tkor_domain)
             if realadd.endswith('.gif'):
                 print(realadd,' 는 광고 이미지였어요')
             else:
@@ -545,7 +566,9 @@ class page:
         def fetch_url(entry):
             path, uri = entry
             if not os.path.exists(path):
-                r = requests.get(uri, stream=True)
+                try: r = requests.get(uri, stream=True)
+                except: print(uri); raise
+                
                 if r.status_code == 200:
                     with open(path, 'wb') as f:
                         for chunk in r:
@@ -570,7 +593,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--newtoki", help="뉴토끼",action="store_true")
     parser.add_argument("-t", "--tkor", help="툰코",action="store_true")
+    parser.add_argument("-l", "--list", help="전체 리스트",action="store_true")
     parser.add_argument("-u", "--update", help="src.txt의 모든 웹툰을 업데이트해요",action="store_true")
+    parser.add_argument("-ht", "--html", help="src.txt의 모든 웹툰을 html만 업데이트해요",action="store_true")
     parser.add_argument("-a", "--append",help="하나의 웹툰을 다운받아요. 띄어쓰기가 있다면 따옴표로 감싸세요")
     parser.add_argument('-al', '--appendlist', nargs='+', default=[],help='여러개의 웹툰을 다운받아요. 여러개를 띄어쓰기로 구분해 나열하세요.')
     parser.add_argument("-hp", "--homepage", help="액자식 홈페이지를 만들어요",action="store_true")
@@ -583,8 +608,45 @@ if __name__ == "__main__":
     parser.add_argument("-viewnsfw", "--viewnewtokinsfw", help="조회수가 많은 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
     parser.add_argument("-new", "--newnewtoki", help="최근에 나온 뉴토끼 웹툰을 다운받을 개수를 정해요",type=int)
     parser.add_argument("-newnsfw", "--newnewtokinsfw", help="최근에 나온 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
+    parser.add_argument("-i", "--intro",help="소개말을 출력해요")
+    parser.add_argument("-s", "--sensitive", help="자극적인 정보를 모두 숨깁니다",action="store_true")
     args = parser.parse_args()
     overwrite=args.overwrite
+    if args.intro!=None:
+        src=srcftn()
+        realtitle=False
+        if (not (args.newtoki or args.tkor)) or (args.newtoki and args.tkor):
+            realtitle=True
+            orig_titles=[i[0] for i in src]
+            underbared_titles=[i[2] for i in src]
+            if args.intro in orig_titles:
+                title={i[0]:i[2] for i in src}[args.intro]
+                with open("info/%s.txt" % title, mode="r", encoding='UTF-8') as intr:
+                    print(intr.read())
+            elif args.intro in underbared_titles:
+                with open("info/%s.txt" % args.intro, mode="r", encoding='UTF-8') as intr:
+                    print(intr.read())
+            else:
+                realtitle=False
+                inp=input('이미 다운 받은 목록에 없습니다.  n 또는 t 옵션을 입력해주세요')
+                if inp in ['n','newtoki']:
+                    opt='newtoki'
+                elif inp in ['t','tkor']:
+                    opt='tkor'
+                else:
+                    print('옵션이 틀렸어요')
+                    raise
+        elif args.newtoki:
+            opt='newtoki'
+        else:
+            opt='tkor'
+        if  not realtitle:
+            mytoon=toon(opt,args.intro)
+            with open("info/%s.txt" % mytoon.title, mode="r", encoding='UTF-8') as intr:
+                print(intr.read())
+        
+
+        print()
     if args.append!=None or args.appendlist!=[]:
         if (not (args.newtoki or args.tkor)) or (args.newtoki and args.tkor):
             inp=input('n 또는 t 옵션을 입력해주세요')
@@ -600,12 +662,26 @@ if __name__ == "__main__":
         else:
             opt='tkor'
         if args.append!=None:
-            appendtoon(args.append,opt)
+            ag=args.append
+            if ag.startswith('.\\'):
+                ag=ag[2:-1]
+            appendtoon(ag,opt)
         if args.appendlist!=[]:
             for i in args.appendlist:
                 appendtoon(i,opt)
+    if args.list:
+        print(srcftn())
     if args.update:
-        update()
+        if (args.newtoki and args.tkor):
+            raise
+        elif args.newtoki:
+            update('newtoki')
+        elif args.tkor:
+            update('tkor')
+        else:
+            update()
+    if args.html:
+        updatehtml()
     if args.homepage:
         homepagemaker()
     if args.searchindex:
@@ -622,20 +698,18 @@ if __name__ == "__main__":
         downloadpopularnewtoki('',False,args.newnewtoki,args.yestoall)
     if args.newnewtokinsfw!=None:
         downloadpopularnewtoki('',True,args.newnewtokinsfw,args.yestoall)
+
     # src=srcftn()
     # for too in src:
 
-    #     try: 
-    #         mytoon=toon(too[1],too[0])
-    #         pagetitle=mytoon.page_titles
-    #         for j in range(len(pagetitle)):
-    #             print(pagetitle[j])
-    #             images=os.listdir(os.path.join('.',too[2],'out'))
-    #             for image in images:
-    #                 if pagetitle[j] in image and image.replace(pagetitle[j]+'_','')[:-4].isnumeric():
-    #                     #print(os.path.join('.',too[2],'out',image),os.path.join('.',too[2],'out',image.replace(pagetitle[j],str(j+1))))
-    #                     os.rename(os.path.join('.',too[2],'out',image),os.path.join('.',too[2],'out',image.replace(pagetitle[j],str(j+1))))
-    #     except: print('pass',too[0]); pass
+    #     mytoon=toon(too[1],too[0])
+    #     pagetitle=mytoon.page_titles
+    #     for j in range(len(pagetitle)):
+    #         print(pagetitle[j])
+    #         images=os.listdir(os.path.join('.',too[2],'out'))
+    #         for image in images:
+    #             if pagetitle[j] in image and image.replace(pagetitle[j]+'_','')[:-4].isnumeric():
+    #                 os.rename(os.path.join('.',too[2],'out',image),os.path.join('.',too[2],'out',image.replace(pagetitle[j],str(j+1))))
         
 
 

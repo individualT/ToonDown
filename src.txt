@@ -2,7 +2,7 @@
 어린 상사	newtoki	어린_상사
 일본 센세	newtoki	일본_센세
 대리부	newtoki	대리부
-우리 사이(탑툰)	newtoki	우리_사이(탑툰)
+우리 사이(탑툰)	tkor	우리-사이-탑툰
 새엄마의 자매들	newtoki	새엄마의_자매들
 사돈 처녀들	newtoki	사돈_처녀들
 친구 엄마	newtoki	친구_엄마
@@ -92,7 +92,6 @@ PC방 여신들	tkor	PC방-여신들
 민감한 문제	newtoki	민감한_문제
 나 혼자만 레벨업	newtoki	나_혼자만_레벨업
 수희0(tngmlek0)	tkor	수희0-tngmlek0
-도굴왕	newtoki	도굴왕
 우리사이	newtoki	우리사이
 교생실습	newtoki	교생실습
 몰래 하는 사이	newtoki	몰래_하는_사이
@@ -100,7 +99,6 @@ PC방 여신들	tkor	PC방-여신들
 친구랑 하면 안돼	newtoki	친구랑_하면_안돼
 동생의 의무	newtoki	동생의_의무
 우리동네 비뇨기과	newtoki	우리동네_비뇨기과
-Retry: 다시 한번 최강 신선으로	newtoki	Retry-_다시_한번_최강_신선으로
 나를 달래줘	newtoki	나를_달래줘
 배덕의 밤	newtoki	배덕의_밤
 유실물	newtoki	유실물
@@ -178,3 +176,24 @@ A급 며느리	newtoki	A급_며느리
 초인종이 울리면 5초만에	newtoki	초인종이_울리면_5초만에
 육체의 교실	newtoki	육체의_교실
 해변의 여신들	newtoki	해변의_여신들
+그녀석 정복기	tkor	그녀석-정복기
+원피스	tkor	원피스
+원펀맨	tkor	원펀맨
+선생님	tkor	선생님
+그녀의 채널	tkor	그녀의-채널
+첩	tkor	첩
+톡투미	tkor	톡투미
+호스트로 금수저	tkor	호스트로-금수저
+첫사랑 모르모트	tkor	첫사랑-모르모트
+이모의 비밀	tkor	이모의-비밀
+엄마한텐비밀이야	tkor	엄마한텐비밀이야
+야왕성귀남	tkor	야왕성귀남
+편의점 샛별이	tkor	편의점-샛별이
+한번 더 해요	tkor	한번-더-해요
+페로몬	tkor	페로몬
+건물주 누나	tkor	건물주-누나
+공대엔 여신이 없다?	tkor	공대엔-여신이-없다
+작은 전쟁	tkor	작은-전쟁
+속죄캠프	tkor	속죄캠프
+그녀의 별명은	tkor	그녀의-별명은
+하지 않으면 패배하는 방	tkor	하지-않으면-패배하는-방
