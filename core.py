@@ -31,17 +31,85 @@ def imageparse(imagename):
 def soupmaker(url):
     return bs(requests.get(url).text,'html.parser')
 def popnewtoki(measurepop,nsfw,count=30):
+    
     page=int(count/96)+1
     if nsfw:
-        urls=[f'https://newtoki101.com/webtoon/p{i}?sst={measurepop}&sod=desc&tag=%EC%84%B1%EC%9D%B8&toon=%EC%84%B1%EC%9D%B8%EC%9B%B9%ED%88%B0' for i in range(1,page+1)]
+        urls=[newtoki_domain+f'/webtoon/p{i}?sst={measurepop}&sod=desc&toon=성인웹툰' for i in range(1,page+1)] #&tag=성인
     else:
-        urls=[f'https://newtoki101.com/webtoon/p{i}?sst={measurepop}&sod=desc' for i in range(1,page+1)]
+        urls=[newtoki_domain+f'/webtoon/p{i}?sst={measurepop}&sod=desc&tag=성인' for i in range(1,page+1)]
     results=[]
     for url in urls:
         soup=soupmaker(url)
         for i in range(1,97):
             results.append([soup.select_one(f'#webtoon-list-all > li:nth-child({i}) > div > div > div > div.img-wrap > div > a')['href'].split('/')[4],soup.select_one(f'#webtoon-list-all > li:nth-child({i}) > div > div > div > div.img-wrap > div > div > a > span').text])
     return results[:count]
+def daytkor(filter,day,countperday=10):
+    filters =['인기','최신','제목']
+    days = ['일','월','화','수','목','금','토','열흘']
+    if not filter in filters:
+        assert False
+    link=tkor_domain+'/웹툰/연재?fil='+filter
+    soup=soupmaker(link)
+    week=soup.select('ul.homelist')
+    if not day in days:
+        da=week[day]
+    else:
+        da=week[days.index(day)]
+    results=[[i['href'][1:],i['alt']] for i in da.select('#title')]
+    return results[:countperday]
+
+def poptkor(now,genre,count=30):
+    nows=['연재','완결']
+    filters =['인기','최신','제목']
+    genres=['성인','드라마','판타지','액션','로맨스','일상','개그','미스터리','순정','스포츠','BL','스릴러','무협','학원','공포','스토리']
+    if (not now in nows) or (not genre in genres and now=='연재') or (not (genre in genres or genre in filters)):
+        assert False
+    # 완결 이라면 genre로 인기, 최신, 제목 가능
+    link=tkor_domain+'/웹툰/'+now+'?fil='+genre
+    soup=soupmaker(link)
+    results=[[i['href'][1:],i['alt']] for i in soup.select('#title')]
+    return results[:count]
+def downloadpopulartkor(opt1,opt2,count,muzisungYes=False):
+    nows=['연재','완결']
+    filters =['인기','최신','제목']
+    days = ['일','월','화','수','목','금','토','열흘']
+    genres=['성인','드라마','판타지','액션','로맨스','일상','개그','미스터리','순정','스포츠','BL','스릴러','무협','학원','공포','스토리']
+    if opt1 in nows:
+        pops=poptkor(opt1,opt2,count)
+    elif opt1 in filters:
+        pops=daytkor(opt1,opt2,count)
+    else:
+        assert False
+    src=srcftn()
+    alreadywebtoons=[i[0] for i in src]
+    alreadywebtoonstitle=[i[2] for i in src]
+    for inf in pops:
+        if not inf[1] in alreadywebtoons:
+            mytoon=toon('tkor',inf[1]) #뉴토끼는 inf가 [id, 실제 제목] 형식이고 툰코는 [제목, 실제 제목] 형식이라 inf[1] 검색 요함
+            if not mytoon.title in alreadywebtoonstitle:
+                if muzisungYes:
+                    proceed='Y'
+                    print(f'툰코에서 웹툰 {inf[1]} ({inf[0]})를 다운받아요.')
+                else:
+                    proceed=input(f'툰코에서 웹툰 {inf[1]} ({inf[0]})를 다운받아요. 진행할까요? [Y/n]')
+                if not proceed.lower()=='n':
+                    print(mytoon.title,mytoon.real_title)
+                    assert mytoon.real_title==inf[1]
+                    src=srcftn()
+                    src.append([mytoon.real_title,'tkor',mytoon.title])
+                    srcwriter(src)
+                    homepagemaker()
+                    searchindex()
+                    mytoon.download()
+                    mytoon.page_html()
+                    mytoon.index_html()
+
+                else:
+                    print(f'{inf[1]} 웹툰 다운로드가 취소되었어요')
+            else:
+                print(f'{inf[1]} 웹툰은 이미 있어요')
+        else:
+            print(f'{inf[1]} 웹툰은 이미 있어요')
 def downloadpopularnewtoki(measurepop,nsfw,count=30,muzisungYes=False):
     src=srcftn()
     alreadywebtoons=[i[0] for i in src]
@@ -50,6 +118,7 @@ def downloadpopularnewtoki(measurepop,nsfw,count=30,muzisungYes=False):
     for inf in pops:
         if not inf[1] in alreadywebtoons:
             mytoon=toon('newtoki',inf[0])
+            
             if not mytoon.title in alreadywebtoonstitle:
                 if muzisungYes:
                     proceed='Y'
@@ -59,6 +128,7 @@ def downloadpopularnewtoki(measurepop,nsfw,count=30,muzisungYes=False):
                 if not proceed.lower()=='n':
                     print(mytoon.title,mytoon.real_title)
                     assert mytoon.real_title==inf[1]
+                    src=srcftn()
                     src.append([mytoon.real_title,'newtoki',mytoon.title])
                     srcwriter(src)
                     homepagemaker()
@@ -112,7 +182,7 @@ def searchnewtoki(query):
         return searchnewtoki(inp)
 
 def searchtkor(query):
-    soup = soupmaker(tkor_domain + '/bbs/search.php?stx=' + query.replace(' ', '+').replace('/',' ').replace('(',' ').replace(')',' '))
+    soup = soupmaker(tkor_domain + '/bbs/search.php?stx=' + query.replace(' ', '+').replace('/',' ').replace('(',' ').replace(')',' ').replace(':',' '))
     results={i.find('h3').text:i['href'][1:] for i in soup.findAll('a',{'id':'title'})}
     if query in results.keys():
         return query, results[query]
@@ -219,6 +289,8 @@ def direc():
         toons.remove('__pycache__')
     if '.idea' in toons:
         toons.remove('.idea')
+    if 'fontawesome' in toons:
+        toons.remove('fontawesome')
     return toons
 
 
@@ -251,7 +323,7 @@ def homepagemaker():
     </div>""" % (i[2], i[2], "./info/%s.jpg" % i[2], i[2] + 'a', toonname, auth, i[2] + 'b', toonname, auth)
     ind = ind[:-1]
     temp = open("index_template.html", "r", encoding='UTF-8').read() % (menus, ind)
-    with open("intro.html", mode='w', encoding='UTF-8') as indexhtml:
+    with open("photo.html", mode='w', encoding='UTF-8') as indexhtml:
         indexhtml.write(temp)
         indexhtml.close()
 
@@ -287,11 +359,12 @@ def update(opt='all'):
         # except: 
         #     pbar.set_description(f"<{info[0]}> 웹툰은 {info[1]}에서 캡챠가 걸려있는것 같아요")
         
-def updatehtml():
-    src=srcftn()
+def updatehtml(opt="all"):
+    src=[i for i in srcftn() if (opt==i[1] or opt=='all')]
     #print(src)
     pbar=tqdm(src)
     for info in pbar:
+
         mytoon=toon(info[1],info[0])
         pbar.set_description(f"<{info[0]}> 웹툰을 {info[1]}에서 html만 업데이트 중이에요")
         mytoon.page_html()
@@ -313,6 +386,7 @@ def appendtoon(query,option):
     src=srcftn()
     alreadytoons={j[0]:j[1] for j in src}
     if not mytoon.real_title in alreadytoons:
+        src=srcftn()
         src.append([mytoon.real_title,option,mytoon.title])
         srcwriter(src)
         print(f'{mytoon.real_title} 웹툰을 추가했어요')
@@ -335,7 +409,7 @@ def searchindex():
         toons+='''<div onclick='location.href="%s"' class="element-item %s" data-isotope-sort-name="%s"><span>%d</span>%s</div>'''%('/'+info[2],colordict[info[1]],info[0],pagenumcounter(info[2]),info[0])
     for color in colordict:
         buttons+='''<button class="button" data-filter=".%s">%s</button>'''%(colordict[color],color)
-    open('search.html','w',encoding='utf-8').write(open('searchtemplate.html','r',encoding='utf-8').read()%(buttons,toons))
+    open('index.html','w',encoding='utf-8').write(open('searchtemplate.html','r',encoding='utf-8').read()%(buttons,toons))
 
 class toon:
     def __init__(self, option, query):
@@ -610,8 +684,25 @@ if __name__ == "__main__":
     parser.add_argument("-newnsfw", "--newnewtokinsfw", help="최근에 나온 뉴토끼 NSFW 웹툰을 다운받을 개수를 정해요",type=int)
     parser.add_argument("-i", "--intro",help="소개말을 출력해요")
     parser.add_argument("-s", "--sensitive", help="자극적인 정보를 모두 숨깁니다",action="store_true")
+    parser.add_argument("-er", "--error", help="에러를 보여줘요",action="store_true")
+    parser.add_argument('-pt', '--populartkor', nargs='+', default=[],help='툰코에서 옵션으로 웹툰을 다운받아요')
     args = parser.parse_args()
     overwrite=args.overwrite
+    if args.error:
+        src=set([i[2] for i in srcftn()])
+        dir=set(direc())
+        print('폴더는 있는데 src에 없는 것')
+        print(dir-src)
+        print('src는 있는데 실제로 없는 것')
+        print(src-dir)
+    if args.populartkor!=[]:
+        lenofopts=len(args.populartkor)
+        if lenofopts==2:
+            downloadpopulartkor(args.populartkor[0],args.populartkor[1],10,args.yestoall)
+        elif lenofopts==3:
+            downloadpopulartkor(args.populartkor[0],args.populartkor[1],int(args.populartkor[2]),args.yestoall)
+        else:
+            assert False
     if args.intro!=None:
         src=srcftn()
         realtitle=False
@@ -681,7 +772,14 @@ if __name__ == "__main__":
         else:
             update()
     if args.html:
-        updatehtml()
+        if (args.newtoki and args.tkor):
+            raise
+        elif args.newtoki:
+            updatehtml('newtoki')
+        elif args.tkor:
+            updatehtml('tkor')
+        else:
+            updatehtml()
     if args.homepage:
         homepagemaker()
     if args.searchindex:

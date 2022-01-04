@@ -1,0 +1,11 @@
+--2022-01-02 14:51:47--  https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/fonts/fontawesome-webfont.eot?
+Resolving maxcdn.bootstrapcdn.com (maxcdn.bootstrapcdn.com)... 104.18.10.207, 104.18.11.207, 2606:4700::6812:acf, ...
+Connecting to maxcdn.bootstrapcdn.com (maxcdn.bootstrapcdn.com)|104.18.10.207|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [application/vnd.ms-fontobject]
+Saving to: ‘fontawesome-webfont.eot?’
+
+fontawesome-webfont.eot?          [<=>                                               ]       0  --.-KB/s               fontawesome-webfont.eot?          [ <=>                                              ]  74.72K  --.-KB/s    in 0.03s   
+
+2022-01-02 14:51:47 (2.30 MB/s) - ‘fontawesome-webfont.eot?’ saved [76518]
+

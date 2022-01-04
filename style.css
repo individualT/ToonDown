@@ -1,6 +1,6 @@
 /* 12columns.css | Created by Katherine Kato | Released under the MIT license */
 /* GitHub: https://kathykato.github.io/12columns/ */
-@import url("https://fonts.googleapis.com/css?family=Barlow:400,500,700");
+@import url("family.css");
 .container {
   margin: auto;
   padding: 0 1rem;
